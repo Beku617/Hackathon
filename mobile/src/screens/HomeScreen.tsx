@@ -5,22 +5,22 @@ import * as Location from "expo-location";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
-  ImageBackground,
   Linking,
   Modal,
   Pressable,
   ScrollView,
-  Switch,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import HomeTab from "./homeTabs/HomeTab";
+import NewsTab from "./homeTabs/NewsTab";
+import ProfileTab from "./homeTabs/ProfileTab";
+import RequestTab from "./homeTabs/RequestTab";
 import { AuthUser } from "../services/auth";
 import {
   CitizenRequestRecord,
@@ -924,753 +924,97 @@ export default function HomeScreen({ navigation }: Props) {
     }
   };
 
-  const renderHomeTab = () => (
-    <>
-      <View style={styles.heroCard}>
-        <Text style={styles.heroTitle}>Сайн байна уу,</Text>
-        <Text style={styles.heroDescription}>
-          Таны илгээсэн хүсэлт бүр хотын хөгжилд үнэтэй хувь нэмэр оруулна. Бид
-          ил тод байдлыг эрхэмлэн ажиллаж байна.
-        </Text>
-
-        <Pressable
-          style={styles.heroButton}
-          onPress={() => setActiveTab("request")}
-        >
-          <Text style={styles.heroButtonText}>Шинэ хүсэлт илгээх</Text>
-        </Pressable>
-
-        <MaterialCommunityIcons
-          color="rgba(134, 209, 144, 0.32)"
-          name="bank-outline"
-          size={120}
-          style={styles.heroWatermark}
+  const renderTabContent = () => {
+    if (activeTab === "home") {
+      return (
+        <HomeTab
+          isNoStatsData={isNoStatsData}
+          isStatsLoading={isStatsLoading}
+          onPressNewRequest={() => setActiveTab("request")}
+          recentDecisions={recentDecisions}
+          reportCards={reportCards}
+          statusBreakdown={statusBreakdown}
+          statusColorMap={statusColorMap}
+          styles={styles}
+          trendBars={trendBars}
         />
-      </View>
+      );
+    }
 
-      <View style={styles.reportHeader}>
-        <Text style={styles.reportTitle}>Ил тод байдлын тайлан</Text>
-        <Text style={styles.reportPeriod}>
-          {
-            "\u0028\u0421\u04af\u04af\u043b\u0438\u0439\u043d 30 \u0445\u043e\u043d\u043e\u0433\u0029"
+    if (activeTab === "request") {
+      return (
+        <RequestTab
+          formatBytes={formatBytes}
+          handleSelectRequestLocation={(option) =>
+            handleSelectRequestLocation(option as RequestLocationOption)
           }
-        </Text>
-      </View>
+          isLocationOpen={isLocationOpen}
+          isRequestTypeOpen={isRequestTypeOpen}
+          locationPlaceholder={locationPlaceholder}
+          onRemoveRequestAttachment={handleRemoveRequestAttachment}
+          onSelectRequestFiles={handleSelectRequestFiles}
+          onSetRequestDetails={setRequestDetails}
+          onSetRequestType={(value) => {
+            setRequestType(value as RequestTypeOption);
+            setIsRequestTypeOpen(false);
+          }}
+          onSubmitRequest={() => void handleSubmitRequest()}
+          onToggleLocationOpen={() => setIsLocationOpen((prev) => !prev)}
+          onToggleRequestTypeOpen={() => setIsRequestTypeOpen((prev) => !prev)}
+          requestAttachmentError={requestAttachmentError}
+          requestAttachments={requestAttachments}
+          requestDetails={requestDetails}
+          requestLocationOptions={requestLocationOptions}
+          requestType={requestType}
+          requestTypeOptions={requestTypeOptions}
+          requestTypePlaceholder={requestTypePlaceholder}
+          selectedRequestLocationOption={selectedRequestLocationOption}
+          styles={styles}
+          submittingRequest={submittingRequest}
+        />
+      );
+    }
 
-      <View style={styles.reportGrid}>
-        {reportCards.map((card) => (
-          <View key={card.label} style={styles.reportCard}>
-            <MaterialCommunityIcons
-              color={card.iconColor}
-              name={card.icon}
-              size={20}
-            />
-            <Text style={styles.reportValue}>{card.value}</Text>
-            <Text style={styles.reportLabel}>{card.label}</Text>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.trendCard}>
-        <Text style={styles.cardTitle}>Хүсэлтийн хандлага</Text>
-
-        <View style={styles.barsRow}>
-          {trendBars.map((bar) => (
-            <View key={bar.day} style={styles.barItem}>
-              <View
-                style={[
-                  styles.bar,
-                  {
-                    backgroundColor: bar.active ? "#0C7A1F" : "#6196E9",
-                    height: bar.height,
-                  },
-                ]}
-              />
-              <Text style={styles.barLabel}>{bar.day}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.categoryCard}>
-        <Text style={styles.cardTitle}>
-          {"\u0422\u04e9\u043b\u04e9\u0432\u04e9\u04e9\u0440"}
-        </Text>
-
-        {statusBreakdown.map((item) => {
-          const color = statusColorMap[item.status] ?? "#8A8A8A";
-          const normalizedPercent = Math.max(0, Math.min(item.percent, 100));
-
-          return (
-            <View key={item.status} style={styles.progressRow}>
-              <View style={styles.progressHeader}>
-                <Text style={styles.progressLabel}>{item.status}</Text>
-                <Text style={styles.progressPercent}>
-                  {item.percent}% ({item.count})
-                </Text>
-              </View>
-
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    { backgroundColor: color, width: `${normalizedPercent}%` },
-                  ]}
-                />
-              </View>
-            </View>
-          );
-        })}
-
-        {isStatsLoading ? (
-          <ActivityIndicator color="#2E7D32" size="small" />
-        ) : null}
-        {isNoStatsData ? (
-          <Text style={styles.emptyStateText}>
-            {
-              "\u041e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u043c\u044d\u0434\u044d\u044d\u043b\u044d\u043b \u0431\u0430\u0439\u0445\u0433\u04af\u0439."
-            }
-          </Text>
-        ) : null}
-      </View>
-
-      <View style={styles.recentHeader}>
-        <Text style={styles.recentTitle}>Сүүлийн үеийн шийдвэрлэлтүүд</Text>
-        <Pressable>
-          <Text style={styles.recentAction}>Бүгдийг харах</Text>
-        </Pressable>
-      </View>
-
-      {recentDecisions.map((item, index) => (
-        <View
-          key={item.title}
-          style={[
-            styles.recentCard,
-            index === recentDecisions.length - 1
-              ? styles.lastListItem
-              : undefined,
-          ]}
-        >
-          <Image source={{ uri: item.image }} style={styles.recentImage} />
-
-          <View style={styles.recentContent}>
-            <View style={styles.recentTopRow}>
-              <Text numberOfLines={3} style={styles.recentCardTitle}>
-                {item.title}
-              </Text>
-              <View
-                style={[
-                  styles.recentStatusPill,
-                  { backgroundColor: item.statusBg },
-                ]}
-              >
-                <Text style={styles.recentStatusText}>{item.status}</Text>
-              </View>
-            </View>
-
-            <Text numberOfLines={2} style={styles.recentDescription}>
-              {item.description}
-            </Text>
-
-            <View style={styles.recentDateRow}>
-              <MaterialCommunityIcons
-                color="#8C8F92"
-                name="calendar-blank-outline"
-                size={14}
-              />
-              <Text style={styles.recentDateText}>{item.date}</Text>
-            </View>
-          </View>
-        </View>
-      ))}
-    </>
-  );
-
-  const renderRequestTab = () => (
-    <>
-      <Text style={styles.requestLeadTitle}>Шинэ хүсэлт илгээх</Text>
-
-      <View style={styles.requestFormCard}>
-        <View
-          style={[
-            styles.formField,
-            isRequestTypeOpen ? styles.formFieldDropdownOpen : undefined,
-          ]}
-        >
-          <Text style={styles.formLabel}>Хүсэлтийн төрөл / Гарчиг</Text>
-          <View style={styles.selectWrap}>
-            <Pressable
-              style={styles.selectInput}
-              onPress={() => setIsRequestTypeOpen((prev) => !prev)}
-            >
-              <Text style={styles.selectText}>
-                {requestType || requestTypePlaceholder}
-              </Text>
-              <Feather
-                color="#5A6160"
-                name={isRequestTypeOpen ? "chevron-up" : "chevron-down"}
-                size={22}
-              />
-            </Pressable>
-            {isRequestTypeOpen ? (
-              <View style={styles.selectOptions}>
-                {requestTypeOptions.map((option, index) => (
-                  <Pressable
-                    key={option}
-                    style={[
-                      styles.selectOption,
-                      index < requestTypeOptions.length - 1
-                        ? styles.selectOptionBorder
-                        : undefined,
-                    ]}
-                    onPress={() => {
-                      setRequestType(option);
-                      setIsRequestTypeOpen(false);
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.selectOptionText,
-                        requestType === option
-                          ? styles.selectOptionTextActive
-                          : undefined,
-                      ]}
-                    >
-                      {option}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            ) : null}
-          </View>
-        </View>
-
-        <View
-          style={[
-            styles.formField,
-            isLocationOpen ? styles.formFieldDropdownOpen : undefined,
-          ]}
-        >
-          <Text style={styles.formLabel}>Хаяг / Байршил</Text>
-          <View style={styles.selectWrap}>
-            <Pressable
-              style={styles.selectInput}
-              onPress={() => setIsLocationOpen((prev) => !prev)}
-            >
-              <Text style={styles.selectText}>
-                {selectedRequestLocationOption || locationPlaceholder}
-              </Text>
-              <Feather
-                color="#5A6160"
-                name={isLocationOpen ? "chevron-up" : "chevron-down"}
-                size={22}
-              />
-            </Pressable>
-            {isLocationOpen ? (
-              <View style={styles.selectOptions}>
-                {requestLocationOptions.map((option, index) => (
-                  <Pressable
-                    key={option}
-                    style={[
-                      styles.selectOption,
-                      index < requestLocationOptions.length - 1
-                        ? styles.selectOptionBorder
-                        : undefined,
-                    ]}
-                    onPress={() => {
-                      void handleSelectRequestLocation(option);
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.selectOptionText,
-                        selectedRequestLocationOption === option
-                          ? styles.selectOptionTextActive
-                          : undefined,
-                      ]}
-                    >
-                      {option}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            ) : null}
-          </View>
-        </View>
-
-        <View style={styles.formField}>
-          <Text style={styles.formLabel}>Дэлгэрэнгүй мэдээлэл</Text>
-          <TextInput
-            multiline
-            placeholder={
-              "Таны асуудал эсвэл санал юу вэ?\nДэлгэрэнгүй бичнэ үү..."
-            }
-            placeholderTextColor="#AFB8AD"
-            style={[styles.formInput, styles.formTextarea]}
-            textAlignVertical="top"
-            onChangeText={setRequestDetails}
-            value={requestDetails}
-          />
-        </View>
-
-        <View style={styles.formField}>
-          <Text style={styles.formLabel}>Хавсралт файлууд (Зураг, Баримт)</Text>
-          <View style={styles.uploadArea}>
-            <Pressable onPress={handleSelectRequestFiles} style={styles.uploadTapArea}>
-              <MaterialCommunityIcons
-                color="#056B1E"
-                name="cloud-upload-outline"
-                size={40}
-              />
-              <Text style={styles.uploadLead}>
-                {
-                  "\u0424\u0430\u0439\u043b \u0447\u0438\u0440\u0447 \u043e\u0440\u0443\u0443\u043b\u043d\u0430 \u0443\u0443, \u044d\u0441\u0432\u044d\u043b"
-                }
-              </Text>
-              <Text style={styles.uploadAction}>{"\u0421\u041e\u041d\u0413\u041e\u0425"}</Text>
-              <Text style={styles.uploadFormats}>
-                {"PNG, JPG, PDF (\u041c\u0430\u043a\u0441 10\u041c\u0431)"}
-              </Text>
-            </Pressable>
-
-            {requestAttachments.length > 0 ? (
-              <View style={styles.uploadList}>
-                {requestAttachments.map((attachment) => {
-                  const isImage = attachment.kind === "image";
-                  const iconName =
-                    attachment.kind === "pdf"
-                      ? "file-pdf-box"
-                      : "file-document-outline";
-
-                  return (
-                    <View key={attachment.id} style={styles.uploadItemRow}>
-                      {isImage ? (
-                        <Image
-                          source={{ uri: attachment.uri }}
-                          style={styles.uploadImageThumb}
-                        />
-                      ) : (
-                        <View style={styles.uploadDocIconWrap}>
-                          <MaterialCommunityIcons
-                            color="#2B5A2D"
-                            name={iconName}
-                            size={22}
-                          />
-                        </View>
-                      )}
-
-                      <View style={styles.uploadMeta}>
-                        <Text numberOfLines={1} style={styles.uploadFileName}>
-                          {attachment.name}
-                        </Text>
-                        <Text style={styles.uploadFileSize}>
-                          {formatBytes(attachment.size)}
-                        </Text>
-                      </View>
-
-                      <Pressable
-                        hitSlop={8}
-                        onPress={() => handleRemoveRequestAttachment(attachment.id)}
-                        style={styles.uploadRemoveButton}
-                      >
-                        <Feather color="#9B1111" name="x" size={18} />
-                      </Pressable>
-                    </View>
-                  );
-                })}
-              </View>
-            ) : null}
-          </View>
-
-          {requestAttachmentError ? (
-            <Text style={styles.uploadErrorText}>{requestAttachmentError}</Text>
-          ) : null}
-        </View>
-        <Pressable
-          style={[
-            styles.submitButton,
-            submittingRequest ? styles.submitButtonDisabled : undefined,
-          ]}
-          onPress={() => void handleSubmitRequest()}
-          disabled={submittingRequest}
-        >
-          {submittingRequest ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <>
-              <MaterialCommunityIcons
-                color="#FFFFFF"
-                name="send-outline"
-                size={24}
-              />
-              <Text style={styles.submitButtonText}>Хүсэлт илгээх</Text>
-            </>
-          )}
-        </Pressable>
-      </View>
-    </>
-  );
-
-  const renderNewsTab = () => (
-    <>
-      <View style={styles.newsTopSection}>
-        <Text style={styles.newsHeading}>Сүүлийн үеийн мэдээ</Text>
-        <View style={styles.filterRow}>
-          {newsFilters.map((filter) => {
-            const isActive = filter.key === activeFilter;
-            return (
-              <Pressable
-                key={filter.key}
-                onPress={() => setActiveFilter(filter.key)}
-                style={[
-                  styles.filterChip,
-                  isActive ? styles.filterChipActive : undefined,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterChipText,
-                    isActive ? styles.filterChipTextActive : undefined,
-                  ]}
-                >
-                  {filter.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-
-      <Pressable style={styles.featuredCard}>
-        <ImageBackground
-          imageStyle={styles.featuredImage}
-          source={{ uri: featuredNews.image }}
-          style={styles.featuredImageWrap}
-        >
-          <View style={styles.featuredOverlay} />
-          <View style={styles.featuredContent}>
-            <Text style={styles.featuredTitle}>{featuredNews.title}</Text>
-            <Text style={styles.featuredDescription}>
-              {featuredNews.description}
-            </Text>
-            <View style={styles.featuredMetaRow}>
-              <View style={styles.featuredMetaItem}>
-                <Feather color="#E9E9E9" name="calendar" size={12} />
-                <Text style={styles.featuredMetaText}>{featuredNews.date}</Text>
-              </View>
-              <View style={styles.featuredMetaItem}>
-                <Feather color="#E9E9E9" name="eye" size={12} />
-                <Text style={styles.featuredMetaText}>
-                  {featuredNews.views}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </ImageBackground>
-      </Pressable>
-
-      {filteredNews.map((item, index) => (
-        <Pressable
-          key={`${item.title}-${item.when}`}
-          style={[
-            styles.newsCard,
-            index === filteredNews.length - 1 ? styles.lastListItem : undefined,
-          ]}
-        >
-          <Image source={{ uri: item.image }} style={styles.newsImage} />
-          <View style={styles.newsBody}>
-            <View style={styles.newsMetaRow}>
-              <Text style={styles.newsCategory}>{item.categoryLabel}</Text>
-              <Text style={styles.newsDot}>•</Text>
-              <Text style={styles.newsWhen}>{item.when}</Text>
-            </View>
-            <Text numberOfLines={2} style={styles.newsTitle}>
-              {item.title}
-            </Text>
-            <Text numberOfLines={3} style={styles.newsDescription}>
-              {item.description}
-            </Text>
-            <View style={styles.moreRow}>
-              <Text style={styles.moreText}>Дэлгэрэнгүй</Text>
-              <Feather color="#177237" name="arrow-right" size={15} />
-            </View>
-          </View>
-        </Pressable>
-      ))}
-    </>
-  );
-
-  const renderSettingsScreen = () => (
-    <>
-      <View style={styles.settingsHeader}>
-        <Pressable
-          hitSlop={8}
-          onPress={() => setIsSettingsScreenOpen(false)}
-          style={styles.settingsBackButton}
-        >
-          <Feather color="#111111" name="arrow-left" size={24} />
-        </Pressable>
-        <Text style={styles.settingsHeaderTitle}>Тохиргоо</Text>
-      </View>
-
-      <Text style={styles.settingsSectionTitle}>Хувийн тохиргоо</Text>
-      <View style={styles.settingsCard}>
-        <Pressable style={styles.settingsRow}>
-          <View style={styles.settingsIconWrap}>
-            <MaterialCommunityIcons color="#1F5FAE" name="lock-reset" size={24} />
-          </View>
-          <View style={styles.settingsTextWrap}>
-            <Text style={styles.settingsRowTitle}>Нууц үг солих</Text>
-            <Text style={styles.settingsRowSubtitle}>Аюулгүй байдлыг хангах</Text>
-          </View>
-          <Feather color="#323232" name="chevron-right" size={24} />
-        </Pressable>
-      </View>
-
-      <Text style={styles.settingsSectionTitle}>Мэдэгдэл</Text>
-      <View style={styles.settingsCard}>
-        <View style={[styles.settingsRow, styles.settingsRowBorder]}>
-          <View style={styles.settingsIconWrap}>
-            <MaterialCommunityIcons color="#A85A1A" name="email-outline" size={24} />
-          </View>
-          <View style={styles.settingsTextWrap}>
-            <Text style={styles.settingsRowTitle}>И-мэйл мэдэгдэл</Text>
-            <Text style={styles.settingsRowSubtitle}>Статус өөрчлөгдөх үед</Text>
-          </View>
-          <Switch
-            onValueChange={setEmailNotificationsEnabled}
-            trackColor={{ false: "#D2D7D2", true: "#108028" }}
-            value={emailNotificationsEnabled}
-          />
-        </View>
-
-        <View style={styles.settingsRow}>
-          <View style={styles.settingsIconWrap}>
-            <MaterialCommunityIcons color="#A85A1A" name="bell-outline" size={24} />
-          </View>
-          <View style={styles.settingsTextWrap}>
-            <Text style={styles.settingsRowTitle}>Push мэдэгдэл</Text>
-            <Text style={styles.settingsRowSubtitle}>Яаралтай шинэчлэлтүүд</Text>
-          </View>
-          <Switch
-            onValueChange={setPushNotificationsEnabled}
-            trackColor={{ false: "#D2D7D2", true: "#108028" }}
-            value={pushNotificationsEnabled}
-          />
-        </View>
-      </View>
-
-      <Pressable onPress={handleLogout} style={styles.settingsLogoutButton}>
-        <MaterialCommunityIcons color="#9B1111" name="logout-variant" size={24} />
-        <Text style={styles.settingsLogoutText}>Системээс гарах</Text>
-      </Pressable>
-    </>
-  );
-
-  const renderProfileTab = () => {
-    if (isSettingsScreenOpen) {
-      return renderSettingsScreen();
+    if (activeTab === "profile") {
+      return (
+        <ProfileTab
+          currentUserRole={currentUser?.role}
+          emailNotificationsEnabled={emailNotificationsEnabled}
+          getFileNameFromRemoteUrl={getFileNameFromRemoteUrl}
+          handleLogout={handleLogout}
+          handleOpenPdfAttachment={handleOpenPdfAttachment}
+          hasNoProfileRequests={hasNoProfileRequests}
+          isImageAttachmentUrl={isImageAttachmentUrl}
+          isProfileRequestsLoading={isProfileRequestsLoading}
+          isSettingsScreenOpen={isSettingsScreenOpen}
+          onCloseSettings={() => setIsSettingsScreenOpen(false)}
+          onOpenSettings={() => setIsSettingsScreenOpen(true)}
+          onPickProfileAvatar={() => void handlePickProfileAvatar()}
+          onSetEmailNotificationsEnabled={setEmailNotificationsEnabled}
+          onSetPreviewImageUri={setPreviewImageUri}
+          onSetPushNotificationsEnabled={setPushNotificationsEnabled}
+          profileAvatarUri={profileAvatarUri}
+          profileDisplayName={profileDisplayName}
+          profileEmail={profileEmail}
+          profileMenus={profileMenus}
+          profilePhone={profilePhone}
+          profileRequestCards={profileRequestCards}
+          pushNotificationsEnabled={pushNotificationsEnabled}
+          styles={styles}
+        />
+      );
     }
 
     return (
-      <>
-        <View style={styles.profileTopCard}>
-          <View style={styles.profileIdentityRow}>
-            <View style={styles.avatarWrap}>
-              {profileAvatarUri ? (
-                <Image
-                  source={{ uri: profileAvatarUri }}
-                  style={styles.profileAvatar}
-                />
-              ) : (
-                <View
-                  style={[styles.profileAvatar, styles.profileAvatarPlaceholder]}
-                >
-                  <Feather color="#90A090" name="user" size={52} />
-                </View>
-              )}
-              <Pressable
-                hitSlop={8}
-                onPress={() => void handlePickProfileAvatar()}
-                style={styles.editAvatarButton}
-              >
-                <Feather color="#FFFFFF" name="edit-2" size={16} />
-              </Pressable>
-            </View>
-
-            <View style={styles.profileIdentityTextWrap}>
-              <Text style={styles.profileName}>{profileDisplayName}</Text>
-            </View>
-          </View>
-
-          <View style={styles.profileInfoCard}>
-            <MaterialCommunityIcons
-              color="#0B6D29"
-              name="email-outline"
-              size={30}
-            />
-            <View style={styles.profileInfoTextWrap}>
-              <Text style={styles.profileInfoLabel}>И-мэйл хаяг</Text>
-              <Text style={styles.profileInfoValue}>{profileEmail}</Text>
-            </View>
-          </View>
-
-          <View style={styles.profileInfoCard}>
-            <MaterialCommunityIcons
-              color="#0B6D29"
-              name="phone-outline"
-              size={30}
-            />
-            <View style={styles.profileInfoTextWrap}>
-              <Text style={styles.profileInfoLabel}>Утасны дугаар</Text>
-              <Text style={styles.profileInfoValue}>{profilePhone}</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.profileRequestsHeader}>
-          <Text style={styles.profileRequestsTitle}>{currentUser?.role === "admin" ? "\u0425\u04af\u0441\u044d\u043b\u0442\u04af\u04af\u0434" : "\u041c\u0438\u043d\u0438\u0439 \u0445\u04af\u0441\u044d\u043b\u0442\u04af\u04af\u0434"}</Text>
-        </View>
-
-        {isProfileRequestsLoading ? (
-          <View style={styles.profileRequestsEmptyWrap}>
-            <ActivityIndicator color="#2E7D32" size="small" />
-          </View>
-        ) : null}
-
-        {hasNoProfileRequests ? (
-          <View style={styles.profileRequestsEmptyWrap}>
-            <Text style={styles.profileRequestsEmptyText}>Таны хүсэлт алга</Text>
-          </View>
-        ) : null}
-
-        {!isProfileRequestsLoading
-          ? profileRequestCards.map((item) => (
-              <View key={item.id} style={styles.profileRequestCard}>
-                <View style={styles.profileRequestTopRow}>
-                  <View
-                    style={[
-                      styles.profileStatusPill,
-                      { backgroundColor: item.statusBg },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.profileStatusText,
-                        { color: item.statusColor },
-                      ]}
-                    >
-                      {item.status}
-                    </Text>
-                  </View>
-                  <Text style={styles.profileRequestDate}>{item.date}</Text>
-                </View>
-
-                <Text style={styles.profileRequestTitle}>{item.title}</Text>
-                <Text numberOfLines={2} style={styles.profileRequestDescription}>
-                  {item.description}
-                </Text>
-
-                <View style={styles.profileAttachmentsWrap}>
-                  {item.attachments.length > 0 ? (
-                    item.attachments.map((attachment) => {
-                      const fileName = getFileNameFromRemoteUrl(attachment.url);
-                      const isImageAttachment = isImageAttachmentUrl(
-                        attachment.url,
-                      );
-
-                      if (isImageAttachment) {
-                        return (
-                          <Pressable
-                            key={`${item.id}-${attachment.publicId}`}
-                            onPress={() => setPreviewImageUri(attachment.url)}
-                            style={styles.profileAttachmentItem}
-                          >
-                            <Image
-                              source={{ uri: attachment.url }}
-                              style={styles.profileAttachmentThumbnail}
-                            />
-                            <Text
-                              numberOfLines={1}
-                              style={styles.profileAttachmentName}
-                            >
-                              {fileName}
-                            </Text>
-                          </Pressable>
-                        );
-                      }
-
-                      return (
-                        <Pressable
-                          key={`${item.id}-${attachment.publicId}`}
-                          onPress={() => void handleOpenPdfAttachment(attachment.url)}
-                          style={styles.profileAttachmentItem}
-                        >
-                          <View style={styles.profileAttachmentPdfIconWrap}>
-                            <MaterialCommunityIcons
-                              color="#A11E1E"
-                              name="file-pdf-box"
-                              size={22}
-                            />
-                          </View>
-                          <Text
-                            numberOfLines={1}
-                            style={styles.profileAttachmentName}
-                          >
-                            {fileName}
-                          </Text>
-                        </Pressable>
-                      );
-                    })
-                  ) : (
-                    <Text style={styles.profileNoAttachmentsText}>{"\u0425\u0430\u0432\u0441\u0440\u0430\u043b\u0442 \u0431\u0430\u0439\u0445\u0433\u04af\u0439"}</Text>
-                  )}
-                </View>
-              </View>
-            ))
-          : null}
-
-        <View style={styles.profileMenuCard}>
-          {profileMenus.map((item, index) => (
-            <Pressable
-              key={item.label}
-              onPress={() => {
-                if (item.key === "settings") {
-                  setIsSettingsScreenOpen(true);
-                }
-              }}
-              style={[
-                styles.profileMenuRow,
-                index < profileMenus.length - 1
-                  ? styles.profileMenuRowBorder
-                  : undefined,
-              ]}
-            >
-              <View style={styles.profileMenuLeft}>
-                <MaterialCommunityIcons color="#121212" name={item.icon} size={32} />
-                <Text style={styles.profileMenuText}>{item.label}</Text>
-              </View>
-              <Feather color="#2F392F" name="chevron-right" size={30} />
-            </Pressable>
-          ))}
-        </View>
-
-        <Pressable
-          onPress={handleLogout}
-          style={[styles.settingsLogoutButton, styles.profileLogoutButton]}
-        >
-          <MaterialCommunityIcons color="#9B1111" name="logout-variant" size={24} />
-          <Text style={styles.settingsLogoutText}>Системээс гарах</Text>
-        </Pressable>
-      </>
+      <NewsTab
+        activeFilter={activeFilter}
+        featuredNews={featuredNews}
+        filteredNews={filteredNews}
+        newsFilters={newsFilters}
+        onSetActiveFilter={(key) => setActiveFilter(key as NewsFilterKey)}
+        styles={styles}
+      />
     );
-  };
-
-  const renderTabContent = () => {
-    if (activeTab === "home") return renderHomeTab();
-    if (activeTab === "request") return renderRequestTab();
-    if (activeTab === "profile") return renderProfileTab();
-    return renderNewsTab();
   };
 
   const renderHeaderRight = () => {
