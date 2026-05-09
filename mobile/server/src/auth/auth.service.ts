@@ -15,7 +15,7 @@ export interface PublicUser {
   email: string;
   username: string;
   phone: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'worker';
 }
 
 export interface AuthResponse {
@@ -115,7 +115,9 @@ export class AuthService {
   private normalizeIdentifier(payload: Record<string, unknown>): string {
     const identifierCandidate =
       payload.email ?? payload.identifier ?? payload.username;
-    return String(identifierCandidate || '').trim().toLowerCase();
+    return String(identifierCandidate || '')
+      .trim()
+      .toLowerCase();
   }
 
   private normalizeUsername(value: unknown): string {
@@ -126,7 +128,9 @@ export class AuthService {
   }
 
   private normalizeEmail(value: unknown): string {
-    return String(value || '').trim().toLowerCase();
+    return String(value || '')
+      .trim()
+      .toLowerCase();
   }
 
   private normalizeFullName(value: unknown): string {
@@ -134,7 +138,9 @@ export class AuthService {
   }
 
   private normalizePhone(value: unknown): string {
-    return String(value || '').replace(/\D/g, '').trim();
+    return String(value || '')
+      .replace(/\D/g, '')
+      .trim();
   }
 
   private readPassword(value: unknown): string {
