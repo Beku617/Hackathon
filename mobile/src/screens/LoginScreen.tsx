@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
@@ -52,285 +53,265 @@ export default function LoginScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.background}>
-        <View style={[styles.diagonal, styles.diagonalTop]} />
-        <View style={[styles.diagonal, styles.diagonalBottom]} />
-
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.flex}
+      <StatusBar style="dark" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.flex}
+      >
+        <ScrollView
+          bounces={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <ScrollView
-            bounces={false}
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.heroSection}>
-              <View style={styles.logoBox}>
-                <MaterialCommunityIcons name="bank-outline" size={56} color="#FFFFFF" />
-              </View>
-              <Text style={styles.heroTitle}>Иргэдийн хүсэлт, өргөдлийн систем</Text>
-              <Text style={styles.heroCopyright}>© 2026 Төрийн захиргааны газар</Text>
+          <View style={styles.heroCard}>
+            <View style={styles.heroIconTile}>
+              <MaterialCommunityIcons name="bank-outline" size={58} color="#FFFFFF" />
             </View>
+            <Text style={styles.heroTitle}>Иргэдийн хүсэлт, өргөдлийн систем</Text>
+            <Text style={styles.heroCopyright}>© 2026 Төрийн захиргааны газар</Text>
+          </View>
 
-            <View style={styles.card}>
-              <View style={styles.tabRow}>
-                <Pressable
-                  onPress={() => setActiveTab('login')}
-                  style={[styles.tabButton, isLoginTab ? styles.tabButtonActive : styles.tabButtonInactive]}
-                >
-                  <Text style={[styles.tabText, isLoginTab ? styles.tabTextActive : styles.tabTextInactive]}>
-                    Нэвтрэх
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => setActiveTab('register')}
-                  style={[styles.tabButton, !isLoginTab ? styles.tabButtonActive : styles.tabButtonInactive]}
-                >
-                  <Text style={[styles.tabText, !isLoginTab ? styles.tabTextActive : styles.tabTextInactive]}>
-                    Бүртгүүлэх
-                  </Text>
-                </Pressable>
-              </View>
-
-              {isLoginTab ? (
-                <>
-                  <Text style={styles.cardTitle}>Нэвтрэх</Text>
-
-                  <Text style={styles.inputLabel}>Имэйл эсвэл хэрэглэгчийн нэр</Text>
-                  <View style={styles.inputWrap}>
-                    <Feather color="#4E5E52" name="user" size={20} />
-                    <TextInput
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      onChangeText={setIdentifier}
-                      placeholder="жишээ: ner@example.mn"
-                      placeholderTextColor="#7D8A7E"
-                      style={styles.input}
-                      value={identifier}
-                    />
-                  </View>
-
-                  <Text style={styles.inputLabel}>Нууц үг</Text>
-                  <View style={styles.inputWrap}>
-                    <MaterialCommunityIcons color="#4E5E52" name="lock-outline" size={22} />
-                    <TextInput
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      onChangeText={setPassword}
-                      placeholder="********"
-                      placeholderTextColor="#7D8A7E"
-                      secureTextEntry
-                      style={styles.input}
-                      value={password}
-                    />
-                  </View>
-
-                  <Pressable style={styles.forgotRow}>
-                    <Text style={styles.forgotText}>Нууц үгээ мартсан уу?</Text>
-                  </Pressable>
-                </>
-              ) : (
-                <>
-                  <Text style={styles.cardTitle}>Бүртгүүлэх</Text>
-                  <Text style={styles.registerHelperText}>
-                    Шинэ хэрэглэгч бүртгүүлэхийн тулд доорх товчийг дарна уу.
-                  </Text>
-                </>
-              )}
-
+          <View style={styles.formCard}>
+            <View style={styles.tabTrack}>
               <Pressable
-                style={[styles.primaryButton, loading ? styles.disabledButton : null]}
-                onPress={isLoginTab ? handleLogin : () => navigation.navigate('Register')}
-                disabled={loading}
+                onPress={() => setActiveTab('login')}
+                style={[styles.tabButton, isLoginTab ? styles.tabButtonActive : styles.tabButtonInactive]}
               >
-                {loading && isLoginTab ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <>
-                    <Feather color="#FFFFFF" name={isLoginTab ? 'log-in' : 'user-plus'} size={22} />
-                    <Text style={styles.primaryButtonText}>{isLoginTab ? 'Нэвтрэх' : 'Бүртгүүлэх'}</Text>
-                  </>
-                )}
+                <Text style={[styles.tabText, isLoginTab ? styles.tabTextActive : styles.tabTextInactive]}>
+                  Нэвтрэх
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setActiveTab('register')}
+                style={[styles.tabButton, !isLoginTab ? styles.tabButtonActive : styles.tabButtonInactive]}
+              >
+                <Text style={[styles.tabText, !isLoginTab ? styles.tabTextActive : styles.tabTextInactive]}>
+                  Бүртгүүлэх
+                </Text>
               </Pressable>
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </View>
+
+            {isLoginTab ? (
+              <>
+                <Text style={styles.cardTitle}>Нэвтрэх</Text>
+
+                <Text style={styles.inputLabel}>Имэйл эсвэл хэрэглэгчийн нэр</Text>
+                <View style={styles.inputWrap}>
+                  <Feather color="#43564A" name="user" size={22} />
+                  <TextInput
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onChangeText={setIdentifier}
+                    placeholder="жишээ: ner@example.mn"
+                    placeholderTextColor="#7A8A7E"
+                    style={styles.input}
+                    value={identifier}
+                  />
+                </View>
+
+                <Text style={styles.inputLabel}>Нууц үг</Text>
+                <View style={styles.inputWrap}>
+                  <MaterialCommunityIcons color="#43564A" name="lock-outline" size={24} />
+                  <TextInput
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onChangeText={setPassword}
+                    placeholder="********"
+                    placeholderTextColor="#7A8A7E"
+                    secureTextEntry
+                    style={styles.input}
+                    value={password}
+                  />
+                </View>
+
+                <Pressable style={styles.forgotRow}>
+                  <Text style={styles.forgotText}>Нууц үгээ мартсан уу?</Text>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <Text style={styles.cardTitle}>Бүртгүүлэх</Text>
+                <Text style={styles.registerHelperText}>
+                  Шинэ хэрэглэгч бол бүртгэлийн хуудас руу орж мэдээллээ бөглөнө үү.
+                </Text>
+              </>
+            )}
+
+            <Pressable
+              style={[styles.primaryButton, loading ? styles.disabledButton : null]}
+              onPress={isLoginTab ? handleLogin : () => navigation.navigate('Register')}
+              disabled={loading}
+            >
+              {loading && isLoginTab ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <>
+                  <Feather color="#FFFFFF" name={isLoginTab ? 'log-in' : 'user-plus'} size={24} />
+                  <Text style={styles.primaryButtonText}>{isLoginTab ? 'Нэвтрэх' : 'Бүртгүүлэх'}</Text>
+                </>
+              )}
+            </Pressable>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
-    backgroundColor: '#EEF2EE',
+    backgroundColor: '#EEF2EF',
     flex: 1,
   },
   flex: {
     flex: 1,
   },
-  background: {
-    backgroundColor: '#EEF2EE',
-    flex: 1,
-  },
-  diagonal: {
-    backgroundColor: 'rgba(255, 255, 255, 0.18)',
-    height: 180,
-    position: 'absolute',
-    width: 520,
-  },
-  diagonalTop: {
-    left: -190,
-    top: 0,
-    transform: [{ rotate: '-40deg' }],
-  },
-  diagonalBottom: {
-    right: -240,
-    top: 600,
-    transform: [{ rotate: '-40deg' }],
-  },
   scrollContent: {
-    paddingBottom: 28,
+    paddingBottom: 24,
     paddingHorizontal: 18,
-    paddingTop: 18,
+    paddingTop: 14,
   },
-  heroSection: {
+  heroCard: {
     alignItems: 'center',
-    backgroundColor: '#1a6b35',
-    borderRadius: 22,
-    marginBottom: 20,
+    backgroundColor: '#136B36',
+    borderRadius: 30,
+    marginBottom: 18,
     paddingHorizontal: 24,
-    paddingVertical: 24,
+    paddingVertical: 28,
   },
-  logoBox: {
+  heroIconTile: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 16,
-    height: 82,
+    backgroundColor: 'rgba(255, 255, 255, 0.24)',
+    borderRadius: 20,
+    height: 116,
     justifyContent: 'center',
-    marginBottom: 16,
-    width: 82,
+    marginBottom: 20,
+    width: 116,
   },
   heroTitle: {
     color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: '700',
-    lineHeight: 30,
+    fontSize: 26,
+    fontWeight: '800',
+    lineHeight: 36,
     textAlign: 'center',
   },
   heroCopyright: {
-    color: '#CFE1D4',
-    fontSize: 12,
-    marginTop: 8,
+    color: '#D9E9DE',
+    fontSize: 16,
+    fontWeight: '500',
+    marginTop: 14,
+    textAlign: 'center',
   },
-  card: {
-    backgroundColor: '#F5F8F5',
-    borderColor: '#D5DED6',
-    borderRadius: 18,
-    borderWidth: 1,
-    marginBottom: 8,
+  formCard: {
+    backgroundColor: '#F3F7F4',
+    borderColor: '#D6DED8',
+    borderRadius: 24,
+    borderWidth: 1.2,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
+    shadowColor: '#102015',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
   },
-  tabRow: {
-    backgroundColor: '#E3EAE4',
-    borderRadius: 14,
+  tabTrack: {
+    backgroundColor: '#DFE5E0',
+    borderRadius: 16,
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 18,
-    padding: 4,
+    marginBottom: 22,
+    padding: 6,
   },
   tabButton: {
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: 12,
     flex: 1,
     justifyContent: 'center',
-    minHeight: 42,
+    minHeight: 52,
   },
   tabButtonActive: {
     backgroundColor: '#FFFFFF',
+    shadowColor: '#9AA79D',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.35,
+    shadowRadius: 1.5,
   },
   tabButtonInactive: {
     backgroundColor: 'transparent',
   },
   tabText: {
-    fontSize: FONT_SIZE.label,
+    fontSize: FONT_SIZE.body,
     fontWeight: '700',
   },
   tabTextActive: {
-    color: '#1a6b35',
+    color: '#106634',
   },
   tabTextInactive: {
-    color: '#6E7C72',
+    color: '#6A776F',
   },
   cardTitle: {
-    color: '#111316',
+    color: '#101512',
     fontSize: FONT_SIZE.title,
-    fontWeight: '700',
-    marginBottom: 16,
+    fontWeight: '800',
+    marginBottom: 18,
   },
   inputLabel: {
-    color: '#2F3F34',
-    fontSize: FONT_SIZE.label,
+    color: '#26362C',
+    fontSize: FONT_SIZE.button,
     fontWeight: '600',
     marginBottom: 8,
   },
   inputWrap: {
     alignItems: 'center',
-    backgroundColor: '#f8f9f8',
-    borderColor: '#e8ebe8',
-    borderRadius: 12,
-    borderWidth: 1.5,
+    backgroundColor: '#F8FAF8',
+    borderColor: '#DDE4DE',
+    borderRadius: 16,
+    borderWidth: 1.2,
     flexDirection: 'row',
     gap: 12,
-    marginBottom: 16,
-    minHeight: 54,
-    paddingHorizontal: 12,
+    marginBottom: 14,
+    minHeight: 62,
+    paddingHorizontal: 14,
   },
   input: {
-    color: '#1C2520',
+    color: '#1F2B23',
     flex: 1,
-    fontSize: FONT_SIZE.body,
-    paddingVertical: 10,
+    fontSize: 18,
+    paddingVertical: 12,
   },
   forgotRow: {
     alignSelf: 'flex-end',
-    marginBottom: 10,
-    marginTop: -6,
+    marginBottom: 14,
+    marginTop: 2,
   },
   forgotText: {
-    color: '#1a6b35',
-    fontSize: FONT_SIZE.label,
-    fontWeight: '600',
+    color: '#106634',
+    fontSize: FONT_SIZE.button,
+    fontWeight: '700',
   },
   primaryButton: {
     alignItems: 'center',
-    backgroundColor: '#1a6b35',
-    borderRadius: 12,
+    backgroundColor: '#136B36',
+    borderRadius: 15,
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
     justifyContent: 'center',
-    marginTop: 2,
-    minHeight: 56,
+    minHeight: 60,
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: FONT_SIZE.button,
-    fontWeight: '700',
+    fontSize: FONT_SIZE.title,
+    fontWeight: '800',
   },
   disabledButton: {
     opacity: 0.7,
   },
   registerHelperText: {
-    color: '#4F5B53',
+    color: '#4A5A51',
     fontSize: FONT_SIZE.body,
     fontWeight: '500',
-    lineHeight: 20,
-    marginBottom: 18,
+    lineHeight: 24,
+    marginBottom: 22,
   },
 });
